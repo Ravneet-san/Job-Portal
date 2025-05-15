@@ -50,6 +50,7 @@ if (isset($_POST['submit'])) {
         }
 
         $conn->begin_transaction();
+        $messages = [];
         try {
             foreach ($rows as $rowIndex => $row) {
                 if ($rowIndex === 0) continue;
@@ -62,11 +63,9 @@ if (isset($_POST['submit'])) {
                         break;
                     }
                 }
-
                 if ($value) {
                     continue;
                 }
-
                 $Req_ID++;
                 $Agency = $row[1];
                 $Job_Title = $row[2];
@@ -84,15 +83,17 @@ if (isset($_POST['submit'])) {
                 $sql = "INSERT INTO Job_Details (Req_ID, State_Job_ID, Agency, Job_Title, Region_Name, Creation_Date, Last_Date, Job_Description, Additional_Job_Description1, Additional_Job_Description2) 
                     VALUES ('$Req_ID', '$State_Job_ID', '$Agency', '$Job_Title','$Region_Name','$creation_date', '$Last_Date','$Job_Description','$Additional_Job_Description1', '$Additional_Job_Description2')";
 
+                echo "Data imported successfully from the first sheet (Job Details) for ID: " . $State_Job_ID . "<br>";
                 if (!$conn->query($sql)) throw new Exception("Insert error: " . $conn->error);
             }
             $conn->commit();
-            $message = "File uploaded and data imported successfully from the first sheet (Job Details)!";
+            $message = implode("<br>", $messages);
+//          $message = "File uploaded and data imported successfully from the first sheet (Job Details)!";
         } catch (Exception $e) {
             $conn->rollback();
             $message = "Transaction failed (Sheet 1): " . $e->getMessage();
         }
-
+        echo $message;
         // Second sheet logic (Job Skills)
         try {
             $spreadsheet = IOFactory::load($filePath);
@@ -231,3 +232,5 @@ $conn->close();
 
 </body>
 </html>
+
+
